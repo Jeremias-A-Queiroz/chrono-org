@@ -1,0 +1,44 @@
+#+TITLE: Dashboard de Agenda - Jeremias
+#+AUTHOR: Jeremias
+#+DATE: <2026-01-23 Fri>
+#+TAGS: { JEREMIAS PESSOAL ESTUDO }
+#+SEQ_TODO: TODO(t) INICIADO(s) AGUARDANDO(w) | DONE(d) CANCELADO(c)
+#+ARCHIVE: index_archive.org::
+
+#+BEGIN_EXPORT html
+<div class="grafico-container" style="position: relative; height: 300px; width: 100%;">
+    <canvas id="chart-global-progress"></canvas>
+    <canvas id="chart-global-daily"></canvas>
+</div>
+<script src="../assets/js/chart-global.js" defer></script>
+#+END_EXPORT
+
+* Links de Contexto
+- [[file:unimed/unimed.org][Unimed (CLT)]]
+- [[file:../microtech/microtech.org][Microtech (Consultoria)]]
+- [[file:../kammoldes/kammoldes.org][Kammoldes (Consultoria)]]
+- [[file:../projetos/portal.org][Projeto Portal TNG (Longo Prazo)]]
+
+* Tarefas Pessoais e Estudos
+** INICIADO Estudo de Org-Mode Avançado
+   :PROPERTIES:
+   :CATEGORY: Estudo
+   :END:
+   Aprofundamento em Elisp e automação de fluxos de trabalho.
+   :LOGBOOK:
+   CLOCK: [2026-02-22 Sun 10:00]--[2026-02-22 Sun 12:00] =>  02:00
+   CLOCK: [2026-02-15 Sun 10:00]--[2026-02-15 Sun 12:00] =>  02:00
+   CLOCK: [2026-02-08 Sun 10:00]--[2026-02-08 Sun 12:00] =>  02:00
+   CLOCK: [2026-02-01 Sun 10:00]--[2026-02-01 Sun 12:00] =>  02:00
+   CLOCK: [2026-01-25 Sun 10:00]--[2026-01-25 Sun 12:00] =>  02:00
+   :END:
+
+** DONE Planejamento Financeiro Mensal
+   :PROPERTIES:
+   :CATEGORY: Finanças
+   :END:
+   Revisão de gastos e investimentos do mês.
+   :LOGBOOK:
+   CLOCK: [2026-01-30 Fri 20:00]--[2026-01-30 Fri 22:00] =>  02:00
+   CLOCK: [2026-02-27 Fri 20:00]--[2026-02-27 Fri 22:00] =>  02:00
+   :END:

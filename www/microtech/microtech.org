@@ -1,0 +1,62 @@
+#+TITLE: Consultoria Microtech - Jan/Fev 2026
+#+AUTHOR: Jeremias
+#+DATE: <2026-01-23 Fri>
+#+TAGS: { JEREMIAS CONSULTORIA ZABBIX FIREWALL INFRA }
+#+SEQ_TODO: TODO(t) INICIADO(s) AGUARDANDO(w) | DONE(d) CANCELADO(c)
+#+ARCHIVE: microtech_archive.org::
+
+#+BEGIN_EXPORT html
+<div class="grafico-container" style="position: relative; height: 300px; width: 100%;">
+    <canvas id="chart-microtech-effort"></canvas>
+</div>
+<script src="../../assets/js/chart-microtech.js" defer></script>
+#+END_EXPORT
+
+* Relatório de Esforço
+  #+BEGIN: clocktable :scope file :block thismonth :maxlevel 4
+  #+END:
+
+* Projetos Ativos
+** INICIADO Migração Zabbix 7.0
+   :PROPERTIES:
+   :EFFORT: 20:00
+   :END:
+   Atualização do parque de monitoramento para a nova versão LTS.
+
+*** DONE Levantamento de Requisitos e Backup
+    :PROPERTIES:
+    :EFFORT: 04:00
+    :END:
+    Backup dos bancos de dados e snapshot das VMs.
+    :LOGBOOK:
+    CLOCK: [2026-01-27 Tue 19:00]--[2026-01-27 Tue 21:00] =>  02:00
+    CLOCK: [2026-01-29 Thu 19:00]--[2026-01-29 Thu 21:00] =>  02:00
+    :END:
+
+*** INICIADO Atualização dos Proxies (Filiais) [2/5]
+    :PROPERTIES:
+    :EFFORT: 10:00
+    :END:
+    Atualização dos Zabbix Proxies nas unidades remotas.
+    - [X] Filial SP
+    - [X] Filial RJ
+    - [ ] Filial SC
+    - [ ] Filial RS
+    - [ ] Filial MG
+    :LOGBOOK:
+    CLOCK: [2026-02-03 Tue 19:00]--[2026-02-03 Tue 21:00] =>  02:00
+    CLOCK: [2026-02-05 Thu 19:00]--[2026-02-05 Thu 21:00] =>  02:00
+    CLOCK: [2026-02-10 Tue 19:00]--[2026-02-10 Tue 21:00] =>  02:00
+    :END:
+
+** TODO Auditoria de Firewall (PFSense)
+   :PROPERTIES:
+   :EFFORT: 08:00
+   :END:
+   Revisão de regras de entrada e saída.
+   :LOGBOOK:
+   CLOCK: [2026-02-12 Thu 19:00]--[2026-02-12 Thu 21:00] =>  02:00
+   CLOCK: [2026-02-17 Tue 19:00]--[2026-02-17 Tue 21:00] =>  02:00
+   CLOCK: [2026-02-19 Thu 19:00]--[2026-02-19 Thu 21:00] =>  02:00
+   CLOCK: [2026-02-24 Tue 19:00]--[2026-02-24 Tue 21:00] =>  02:00
+   :END:
