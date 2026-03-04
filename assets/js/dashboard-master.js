@@ -4,114 +4,168 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const month = container.dataset.month;
 
-    try {
-        const response = await fetch(`../assets/data/global-dashboard-${month}.json`);
-        if (!response.ok) throw new Error("JSON Global não encontrado.");
-        const globalData = await response.json();
+    // Helper: Converte Date string para minutos totais desde a meia-noite
+    const getMinutes = (dateStr) => {
+        const d = new Date(dateStr);
+        return d.getHours() * 60 + d.getMinutes();
+    };
 
-        // Configurações do Tema Dark
+    // Helper: Formata minutos para HH:mm
+    const formatHM = (mins) => {
+        const h = Math.floor(mins / 60).toString().padStart(2, '0');
+        const m = (mins % 60).toString().padStart(2, '0');
+        return `${h}:${m}`;
+    };
+
+    try {
+        const response = await fetch(`assets/data/global-dashboard-${month}.json`);
+        if (!response.ok) throw new Error("JSON Global não encontrado.");
+        const data = await response.json();
+
+        // Configuração Dark Mode (Gruvbox Material)
         Chart.defaults.color = '#a89984';
         Chart.defaults.borderColor = '#3c3836';
 
-        // ==========================================
-        // PREPARAÇÃO DE DADOS MESTRES
-        // ==========================================
-        
-        // 1. Coleta e Organiza os Contextos (Clientes)
-        const contextTotals = {};
-        globalData.summaries.forEach(sum => {
-            if(sum.context !== 'index') {
-                contextTotals[sum.context] = {
-                    total: sum.total_minutes / 60, // Trabalhamos em horas no Master
-                    color: sum.color || '#888'
-                };
-            }
-        });
-
-        // 2. Organiza Entradas Diárias para Gráfico Cronológico
-        const dailyData = {};
-        const datesSet = new Set();
-
-        globalData.all_entries.forEach(entry => {
-            if(!entry.start) return;
-            const dateStr = entry.start.split('T')[0];
-            datesSet.add(dateStr);
-            
-            // Fallback de contexto/cor via tags caso o LISP não mande a chave context na entry
-            let ctx = "outro";
-            let color = "#504945";
-            if (entry.tags && entry.tags.length > 0) {
-                // Tenta achar cor correspondente nos summaries (simplificado)
-                ctx = entry.tags[0]; 
-            }
-
-            if(!dailyData[dateStr]) dailyData[dateStr] = {};
-            if(!dailyData[dateStr][ctx]) dailyData[dateStr][ctx] = { dur: 0, color: color };
-            
-            dailyData[dateStr][ctx].dur += (entry.duration_minutes / 60);
-        });
-
-        const sortedDates = Array.from(datesSet).sort();
-
-        // ==========================================
-        // GRÁFICO B: Barras Cronológicas (Stack diário)
-        // ==========================================
-        // Extrai todos os "sub-contextos" únicos encontrados nos dias
-        const allKeys = new Set();
-        Object.values(dailyData).forEach(dayObj => Object.keys(dayObj).forEach(k => allKeys.add(k)));
-        
-        const datasetsB = Array.from(allKeys).map(key => {
-            return {
-                label: key,
-                data: sortedDates.map(date => dailyData[date][key] ? dailyData[date][key].dur : 0),
-                backgroundColor: sortedDates.map(date => dailyData[date][key] ? dailyData[date][key].color : '#000'),
-                borderWidth: 0
+        // 1. Mapeamento de Contextos (Cores e Totais)
+        const contextMap = {};
+        data.summaries.forEach(s => {
+            contextMap[s.context] = { 
+                color: s.color || '#888', 
+                label: s.context, 
+                total: s.total_minutes 
             };
         });
 
+        // 2. Processamento para Timeline (Gráfico B)
+        const timelineDatasets = {}; // { context: [ {x, y: [start, end]} ] }
+        let globalMinStart = 1440;
+        let globalMaxEnd = 0;
+        const presentDates = new Set();
+
+        data.all_entries.forEach(entry => {
+            if (!entry.start || !entry.end) return;
+
+            const ctx = entry.context || "outros";
+            // Garante que o contexto exista no mapa (fallback para robustez)
+            if (!contextMap[ctx]) contextMap[ctx] = { color: '#504945', label: ctx, total: 0 };
+
+            const dateStr = entry.start.split('T')[0];
+            const startMin = getMinutes(entry.start);
+            const endMin = getMinutes(entry.end);
+
+            presentDates.add(dateStr);
+
+            // Atualiza limites globais do eixo Y
+            if (startMin < globalMinStart) globalMinStart = startMin;
+            if (endMin > globalMaxEnd) globalMaxEnd = endMin;
+
+            if (!timelineDatasets[ctx]) timelineDatasets[ctx] = [];
+            
+            // Floating Bar: Objeto x/y independente
+            timelineDatasets[ctx].push({
+                x: dateStr,
+                y: [startMin, endMin]
+            });
+        });
+
+        // Arredonda limites para horas cheias (margem visual)
+        globalMinStart = Math.floor(globalMinStart / 60) * 60;
+        globalMaxEnd = Math.ceil(globalMaxEnd / 60) * 60;
+        
+        const sortedDates = Array.from(presentDates).sort();
+
+        // Montagem dos Datasets para o Gráfico B
+        const datasetsB = Object.keys(timelineDatasets).map(ctx => ({
+            label: contextMap[ctx].label,
+            data: timelineDatasets[ctx],
+            backgroundColor: contextMap[ctx].color,
+            borderWidth: 0,
+            barPercentage: 0.8,
+            categoryPercentage: 0.9
+        }));
+
+        // ==========================================
+        // GRÁFICO B: Timeline Global (Floating Bars)
+        // ==========================================
         new Chart(document.getElementById('chart-master-chronological'), {
             type: 'bar',
-            data: { labels: sortedDates, datasets: datasetsB },
+            data: { 
+                labels: sortedDates, 
+                datasets: datasetsB 
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { stacked: true },
+                    x: { 
+                        stacked: true, // Contextos se empilham na mesma coluna do dia
+                        title: { display: true, text: 'Dia do Mês' },
+                        grid: { color: '#32302f' }
+                    },
                     y: { 
-                        stacked: true,
-                        title: { display: true, text: 'Horas' }
+                        min: globalMinStart,
+                        max: globalMaxEnd,
+                        stacked: false, // Importante: Valores são absolutos [start, end], não somam
+                        ticks: {
+                            stepSize: 120, // 2 horas
+                            callback: v => formatHM(v)
+                        },
+                        title: { display: true, text: 'Horário' },
+                        grid: { color: '#32302f' }
                     }
                 },
-                plugins: { legend: { display: false } }
+                plugins: {
+                    legend: { 
+                        position: 'bottom',
+                        labels: { boxWidth: 12, padding: 20 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (c) => {
+                                const [s, e] = c.raw.y;
+                                return `${c.dataset.label}: ${formatHM(s)} - ${formatHM(e)}`;
+                            }
+                        }
+                    }
+                }
             }
         });
 
         // ==========================================
-        // GRÁFICO C: Donut (Total por Cliente)
+        // GRÁFICOS DE VOLUME (Reaproveitados/Ajustados)
         // ==========================================
-        const labelsC = Object.keys(contextTotals);
-        const dataC = Object.values(contextTotals).map(c => c.total);
-        const bgColorsC = Object.values(contextTotals).map(c => c.color);
+        const labelsVol = Object.keys(contextMap);
+        // Converter para horas para facilitar leitura
+        const dataVol = labelsVol.map(c => (contextMap[c].total / 60).toFixed(1)); 
+        const colorsVol = labelsVol.map(c => contextMap[c].color);
 
+        // Gráfico C: Donut (Volume por Cliente)
         new Chart(document.getElementById('chart-master-donut'), {
             type: 'doughnut',
             data: {
-                labels: labelsC,
-                datasets: [{ data: dataC, backgroundColor: bgColorsC, borderWidth: 1, borderColor: '#282828' }]
+                labels: labelsVol,
+                datasets: [{ 
+                    data: dataVol, 
+                    backgroundColor: colorsVol, 
+                    borderWidth: 1, 
+                    borderColor: '#282828' 
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } } 
+            }
         });
 
-        // ==========================================
-        // GRÁFICO A: Barras Horizontais (Total por Cliente)
-        // ==========================================
+        // Gráfico A: Barras Horizontais (Ranking)
         new Chart(document.getElementById('chart-master-horizontal'), {
             type: 'bar',
             data: {
-                labels: labelsC,
+                labels: labelsVol,
                 datasets: [{
-                    data: dataC,
-                    backgroundColor: bgColorsC,
+                    data: dataVol,
+                    backgroundColor: colorsVol,
                     borderWidth: 0
                 }]
             },
@@ -120,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { display: false },
+                    x: { display: true, title: { display: true, text: 'Horas Totais' } },
                     y: { grid: { display: false } }
                 },
                 plugins: { legend: { display: false } }
@@ -128,6 +182,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
     } catch (error) {
-        console.error("Erro ao renderizar Dashboard Master:", error);
+        console.error("Erro no Dashboard Master:", error);
     }
 });

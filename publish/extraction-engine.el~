@@ -1,6 +1,6 @@
 ;;; extraction-engine.el --- Motor de extração de métricas da Agenda Org-mode
 ;;;
-;;; Autor: Jeremias (Gerado via Gemini)
+;;; Autor: Jeremias
 ;;; Descrição: Extrai dados granulares de LOGBOOK dos arquivos de agenda e gera JSONs.
 ;;; Dependências: json, org, subr-x (Nativas do Emacs)
 
@@ -9,14 +9,14 @@
 (require 'subr-x)
 
 ;; Variável de configuração (Deve ser populada pelo publish.el ou init.el)
-(defvar jeremias/agenda-files nil
+(defvar clock2json/agenda-files nil
   "Lista de caminhos completos dos arquivos .org da agenda.")
 
 ;;; ----------------------------------------------------------------------------
 ;;; UTILITÁRIOS (Suckless + GOFAI)
 ;;; ----------------------------------------------------------------------------
 
-(defun jeremias/generate-color-from-string (str)
+(defun clock2json/generate-color-from-string (str)
   "Gera uma cor HEX consistente baseada no hash MD5 da string.
   Usa secure-hash nativo para evitar erros de dependência."
   (let* ((hash (secure-hash 'md5 (or str "default")))
@@ -26,29 +26,29 @@
          (b (substring hash 4 6)))
     (format "#%s%s%s" r g b)))
 
-(defun jeremias/get-context-from-file (filepath)
+(defun clock2json/get-context-from-file (filepath)
   "Retorna o nome base do arquivo como contexto (ex: .../unimed.org -> unimed)."
   (file-name-base filepath))
 
-(defun jeremias/ensure-assets-dir (filepath)
+(defun clock2json/ensure-assets-dir (filepath)
   "Garante que existe ./assets/data/ relativo ao arquivo e retorna o caminho."
   (let ((dir (concat (file-name-directory filepath) "assets/data/")))
     (unless (file-exists-p dir)
       (make-directory dir t))
     dir))
 
-(defun jeremias/parse-org-timestamp (ts-str)
+(defun clock2json/parse-org-timestamp (ts-str)
   "Converte timestamp Org [YYYY-MM-DD Dia HH:MM] para string ISO 8601 (YYYY-MM-DDTHH:MM:00)."
   (when (string-match "\\[\\([0-9-]+\\).*?\\([0-9:]+\\)\\]" ts-str)
     (format "%sT%s:00" (match-string 1 ts-str) (match-string 2 ts-str))))
 
-(defun jeremias/get-duration-minutes (start-iso end-iso)
+(defun clock2json/get-duration-minutes (start-iso end-iso)
   "Calcula a diferença em minutos entre dois timestamps ISO."
   (let ((t1 (date-to-time start-iso))
         (t2 (date-to-time end-iso)))
     (round (/ (float-time (time-subtract t2 t1)) 60))))
 
-(defun jeremias/write-json-file (data filepath)
+(defun clock2json/write-json-file (data filepath)
   "Escreve a estrutura alist DATA como JSON no FILEPATH."
   (with-temp-file filepath
     (insert (json-encode data))))
@@ -57,7 +57,7 @@
 ;;; EXTRAÇÃO (CORE)
 ;;; ----------------------------------------------------------------------------
 
-(defun jeremias/extract-entries-from-buffer (target-month)
+(defun clock2json/extract-entries-from-buffer (target-month)
   "Varre o buffer atual buscando entradas de LOGBOOK dentro do TARGET-MONTH (YYYY-MM).
   Retorna uma lista de objetos (alists) prontos para JSON."
   (let ((entries '()))
@@ -80,8 +80,8 @@
                (while (re-search-forward "^[ \t]*CLOCK: \\(\\[.*?\\]\\)--\\(\\[.*?\\]\\)" drawer-end t)
                  (let* ((raw-start (match-string 1))
                         (raw-end (match-string 2))
-                        (iso-start (jeremias/parse-org-timestamp raw-start))
-                        (iso-end (jeremias/parse-org-timestamp raw-end)))
+                        (iso-start (clock2json/parse-org-timestamp raw-start))
+                        (iso-end (clock2json/parse-org-timestamp raw-end)))
                    
                    ;; 3. Filtro de Mês Corrente
                    (when (and iso-start 
@@ -91,14 +91,14 @@
                                  (cons "id" (or mov-id ""))
                                  (cons "start" iso-start)
                                  (cons "end" iso-end)
-                                 (cons "duration_minutes" (jeremias/get-duration-minutes iso-start iso-end))
+                                 (cons "duration_minutes" (clock2json/get-duration-minutes iso-start iso-end))
                                  (cons "tags" tags)
                                  (cons "todo_state" (or todo ""))
                                  (cons "effort" (or effort "")))
                            entries))))))))))
     entries))
 
-(defun jeremias/calculate-summary (entries context target-month)
+(defun clock2json/calculate-summary (entries context target-month)
   "Agrega os dados brutos para gerar o arquivo de sumário."
   (let ((total 0)
         (by-tag (make-hash-table :test 'equal))
@@ -124,7 +124,7 @@
     (list (cons "context" context)
           (cons "period" target-month)
           (cons "total_minutes" total)
-          (cons "color" (jeremias/generate-color-from-string context))
+          (cons "color" (clock2json/generate-color-from-string context))
           (cons "by_tag" by-tag)
           (cons "by_status" by-status))))
 
@@ -132,8 +132,8 @@
 ;;; FUNÇÃO PRINCIPAL (ORQUESTRADOR)
 ;;; ----------------------------------------------------------------------------
 
-(defun jeremias/agenda-extract-metrics (&optional target-month)
-  "Extrai métricas de todos os arquivos em jeremias/agenda-files.
+(defun clock2json/agenda-extract-metrics (&optional target-month)
+  "Extrai métricas de todos os arquivos em clock2json/agenda-files.
   Se TARGET-MONTH (YYYY-MM) não for fornecido, usa o mês atual do sistema."
   (interactive)
   ;; Default para mês corrente se nil
@@ -147,19 +147,19 @@
         (index-assets-dir nil))
     
     ;; 1. Processamento Local (Contexto por Contexto)
-    (dolist (file jeremias/agenda-files)
+    (dolist (file clock2json/agenda-files)
       (if (file-exists-p file)
           (with-current-buffer (find-file-noselect file)
-            (let* ((context (jeremias/get-context-from-file file))
-                   (assets-dir (jeremias/ensure-assets-dir file))
+            (let* ((context (clock2json/get-context-from-file file))
+                   (assets-dir (clock2json/ensure-assets-dir file))
                    ;; Extração
-                   (entries (jeremias/extract-entries-from-buffer target-month))
-                   (summary (jeremias/calculate-summary entries context target-month)))
+                   (entries (clock2json/extract-entries-from-buffer target-month))
+                   (summary (clock2json/calculate-summary entries context target-month)))
               
               ;; Gera JSONs Locais
-              (jeremias/write-json-file entries 
+              (clock2json/write-json-file entries 
                                         (expand-file-name (format "%s-%s.json" context target-month) assets-dir))
-              (jeremias/write-json-file summary 
+              (clock2json/write-json-file summary 
                                         (expand-file-name (format "%s-%s-summary.json" context target-month) assets-dir))
               
               ;; Acumula para Global
@@ -179,12 +179,12 @@
                                  (cons "generated_at" (format-time-string "%Y-%m-%dT%H:%M:%S"))
                                  (cons "summaries" global-summaries)
                                  (cons "all_entries" global-entries))))
-          (jeremias/write-json-file global-data 
+          (clock2json/write-json-file global-data 
                                     (expand-file-name (format "global-dashboard-%s.json" target-month) index-assets-dir))
           (message ">>> Dashboard Global gerado com sucesso em: %s" index-assets-dir))
       (message "[ALERTA] Arquivo 'index.org' não encontrado. Dashboard Global não gerado."))))
 
 ;;; Exemplo de uso no Scratch:
 ;; (load "~/src/teste-agenda/agenda/publish/extraction-engine.el")
-;; (setq jeremias/agenda-files '("~/src/teste-agenda/agenda/www/pessoal/index.org" ...))
-;; (jeremias/agenda-extract-metrics "2026-02")
+;; (setq clock2json/agenda-files '("~/src/teste-agenda/agenda/www/pessoal/index.org" ...))
+;; (clock2json/agenda-extract-metrics "2026-02")
