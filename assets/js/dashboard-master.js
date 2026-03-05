@@ -134,10 +134,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         // ==========================================
         // GRÁFICOS DE VOLUME (Reaproveitados/Ajustados)
         // ==========================================
-        const labelsVol = Object.keys(contextMap);
+	// CRIAÇÃO DE UM NOVO ARRAY FILTRADO - ESTA É A ÚNICA LINHA REALMENTE NOVA
+        const filteredContexts = Object.values(contextMap).filter(c => c.total > 0); 
+        const labelsVol = filteredContexts.map(c => c.label);
         // Converter para horas para facilitar leitura
-        const dataVol = labelsVol.map(c => (contextMap[c].total / 60).toFixed(1)); 
-        const colorsVol = labelsVol.map(c => contextMap[c].color);
+        const dataVol = filteredContexts.map(c => (c.total / 60).toFixed(1));
+        const colorsVol = filteredContexts.map(c => c.color);
 
         // Gráfico C: Donut (Volume por Cliente)
         new Chart(document.getElementById('chart-master-donut'), {

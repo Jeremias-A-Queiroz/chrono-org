@@ -178,7 +178,7 @@
                 (setq global-entries (append global-entries context-entries)))
               
               ;; Identifica onde salvar o Global Dashboard (no contexto do Index)
-              (when (string= context "index")
+              (when (string= context "pessoal")
                 (setq index-assets-dir assets-dir))
               
               (message "[OK] %s: %d entradas extraídas." context (length entries))))
@@ -193,7 +193,7 @@
           (clock2json/write-json-file global-data 
                                       (expand-file-name (format "global-dashboard-%s.json" target-month) index-assets-dir))
           (message ">>> Dashboard Global gerado com sucesso em: %s" index-assets-dir))
-      (message "[ALERTA] Arquivo 'index.org' não encontrado. Dashboard Global não gerado."))))
+      (message "[ALERTA] Arquivo 'pessoal.org' não encontrado. Dashboard Global não gerado."))))
 
 ;;; Exemplo de uso no Scratch:
 ;; (load "~/src/teste-agenda/agenda/publish/extraction-engine.el")
