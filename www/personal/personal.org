@@ -1,0 +1,111 @@
+#+TITLE: Personal Agenda
+#+AUTHOR: Jeremias
+#+DATE: {{{time(%Y-%m-%d)}}}
+#+TAGS: { PERSONAL STUDY WORK HOBBY }
+#+SEQ_TODO: TODO(t) IN_PROGRESS(s) WAITING(w) | DONE(d) CANCELED(c)
+#+options: toc:nil num:nil
+
+* Dashboard and Charts
+
+#+begin_comment
+Update data-month attribute whenever a new month begins
+#+end_comment
+
+#+BEGIN_EXPORT html
+<div class="dashboard-container">
+        
+        <!-- 1. GLOBAL DASHBOARD (MASTER) -->
+        <h2>Global Dashboard (Master)</h2>
+        <div id="dashboard-master" data-month="2026-03">
+            
+            <div class="chart-box" style="width: 100%; height: 500px;">
+                <canvas id="chart-master-chronological"></canvas>
+            </div>
+
+            <div class="row">
+                <div class="chart-box" style="flex: 1 1 300px; height: 300px;">
+                    <canvas id="chart-master-donut"></canvas>
+                </div>
+
+                <div class="chart-box" style="flex: 2 1 500px; height: 300px;">
+                    <canvas id="chart-master-horizontal"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <hr style="border-color: #3c3836; margin: 40px 0;">
+
+        <!-- 2. LOCAL DASHBOARD (INDEX) -->
+        <h2>Personal Tasks Dashboard</h2>
+        <div id="dashboard-local" data-context="personal" data-month="2026-03">
+            
+            <div class="chart-box" style="width: 100%; height: 500px;">
+                <canvas id="chart-local-hourly"></canvas>
+            </div>
+            
+            <div class="row">
+                <div class="chart-box" style="flex: 1 1 300px; height: 300px;">
+                    <canvas id="chart-local-donut"></canvas>
+                </div>
+                
+                <div class="chart-box" style="flex: 2 1 500px; height: 300px;">
+                    <canvas id="chart-local-toptasks"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="../assets/js/chart.js"></script>
+    <script src="../assets/js/dashboard-master.js"></script>
+    <script src="../assets/js/dashboard-local.js"></script>
+#+END_EXPORT
+
+* Personal Tasks and Studies
+
+** DONE Advanced Org-Mode Study                                       :STUDY:
+   :PROPERTIES:
+   :CATEGORY: Study
+   :END:
+   Deep dive into Elisp and workflow automation.
+   :LOGBOOK:
+   CLOCK: [2026-02-18 Wed 08:00]--[2026-02-18 Wed 10:00] =>  2:00
+   CLOCK: [2026-02-19 Thu 08:00]--[2026-02-19 Thu 10:00] =>  2:00
+   CLOCK: [2026-02-20 Fri 08:00]--[2026-02-20 Fri 10:00] =>  2:00
+   :END:
+
+** IN_PROGRESS General Agenda Organization [71%]                       :WORK:
+:LOGBOOK:
+CLOCK: [2026-03-02 Mon 08:00]--[2026-03-02 Mon 10:00] =>  2:00
+:END:
+
+*** DONE Logic Optimization [2/2]                                      :WORK:
+CLOSED: [2026-03-03 Tue 15:20]
+:LOGBOOK:
+CLOCK: [2026-03-03 Tue 13:30]--[2026-03-03 Tue 14:00] =>  0:30
+CLOCK: [2026-03-03 Tue 14:50]--[2026-03-03 Tue 15:15] =>  0:25
+:END:
+- [X] Correct Javascript logic
+- [X] Correct Lisp extractor logic
+
+*** DONE Clean and sanitize agenda files [2/2]                         :WORK:
+CLOSED: [2026-03-03 Tue 17:00]
+:LOGBOOK:
+CLOCK: [2026-03-03 Tue 15:30]--[2026-03-03 Tue 17:00] =>  1:30
+:END:
+- [X] Remove dummy tasks
+- [X] Insert HTML fragments for dashboards
+
+*** DONE Build publish file                                            :WORK:
+CLOSED: [2026-03-04 Wed 11:41]
+:LOGBOOK:
+CLOCK: [2026-03-04 Wed 09:54]--[2026-03-04 Wed 11:41] =>  1:47
+:END:
+
+*** DONE Setup Apache .htaccess strategy                               :WORK:
+CLOSED: [2026-03-04 Wed 14:27]
+:LOGBOOK:
+CLOCK: [2026-03-04 Wed 13:33]--[2026-03-04 Wed 14:26] =>  0:53
+:END:
+Strategy for .htaccess created and validated.

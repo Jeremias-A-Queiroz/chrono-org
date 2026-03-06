@@ -1,0 +1,58 @@
+#+TITLE: Client 1 Consulting - Migration Project
+#+AUTHOR: Jeremias
+#+DATE: {{{time(%Y-%m-%d)}}}
+#+TAGS: { KVM PROXMOX BACKUP INFRA }
+#+SEQ_TODO: TODO(t) IN_PROGRESS(s) WAITING(w) | DONE(d) CANCELED(c)
+#+options: toc:nil num:nil
+
+* Dashboard and Charts
+
+#+BEGIN_EXPORT html
+<div class="dashboard-container">
+  <h2>Client 1 Dashboard</h2>
+        
+  <div id="dashboard-local" data-context="client1" data-month="2026-03">
+            
+    <div class="chart-box" style="width: 100%; height: 350px;">
+      <canvas id="chart-local-hourly"></canvas>
+    </div>
+            
+    <div class="row">
+      <div class="chart-box" style="flex: 1 1 300px; height: 300px;">
+        <canvas id="chart-local-donut"></canvas>
+      </div>
+                
+      <div class="chart-box" style="flex: 2 1 400px; height: 300px;">
+        <canvas id="chart-local-toptasks"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="../assets/js/chart.js" defer></script>
+<script src="../assets/js/dashboard-local.js" defer></script>
+#+END_EXPORT
+
+* Infrastructure Migration [33%]
+
+** DONE Assessment of current virtualization environment               :INFRA:
+CLOSED: [2026-02-16 Mon 16:30]
+:LOGBOOK:
+CLOCK: [2026-02-16 Mon 13:30]--[2026-02-16 Mon 16:30] =>  3:00
+:END:
+Evaluating VMs, storage mapping, and network topologies to plan migration to GNU/Linux KVM.
+
+** DONE Setup Proxmox Backup Server (PBS) baremetal                    :BACKUP:
+CLOSED: [2026-02-17 Tue 11:30]
+:LOGBOOK:
+CLOCK: [2026-02-17 Tue 08:30]--[2026-02-17 Tue 11:30] =>  3:00
+:END:
+Installed and configured PBS with ZFS storage array for deduplication.
+
+** IN_PROGRESS Migrate Windows VMs to KVM                              :KVM:
+:LOGBOOK:
+CLOCK: [2026-03-05 Thu 08:30]--[2026-03-05 Thu 11:30] =>  3:00
+CLOCK: [2026-03-06 Fri 08:30]--[2026-03-06 Fri 11:30] =>  3:00
+:END:
+Currently moving critical domain controllers and file servers using virt-v2v.

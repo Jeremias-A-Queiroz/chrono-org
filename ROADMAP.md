@@ -10,9 +10,10 @@ O objetivo é criar um fluxo de publicação "suckless" para o gerenciamento de 
 ---
 
 ## 2. Tarefas Pendentes
-- [ ] Criar arquivos de exemplo;
+- [X] Criar arquivos de exemplo;
+- [X] Criar links de navegação padrão do ORG;
 - [X] Criar uma estratégia consistente de arquivos `.htaccess`;
-- [ ] Criar README.md do projeto.
+- [X] Criar README.md do projeto.
 ---
 
 ## 3. Notas Técnicas Importantes

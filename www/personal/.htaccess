@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Private Area - Personal"
+AuthUserFile /etc/httpd/.passwd-agenda-personal
+Require valid-user

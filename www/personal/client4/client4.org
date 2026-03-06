@@ -1,0 +1,61 @@
+#+TITLE: Client 4 - Security Automations
+#+AUTHOR: Jeremias
+#+DATE: {{{time(%Y-%m-%d)}}}
+#+TAGS: { WAZUH ANSIBLE SECURITY }
+#+SEQ_TODO: TODO(t) IN_PROGRESS(s) WAITING(w) | DONE(d) CANCELED(c)
+#+options: toc:nil num:nil
+
+* Dashboard and Charts
+
+#+BEGIN_EXPORT html
+<div class="dashboard-container">
+  <h2>Client 4 Dashboard</h2>
+        
+  <div id="dashboard-local" data-context="client4" data-month="2026-03">
+            
+    <div class="chart-box" style="width: 100%; height: 350px;">
+      <canvas id="chart-local-hourly"></canvas>
+    </div>
+            
+    <div class="row">
+      <div class="chart-box" style="flex: 1 1 300px; height: 300px;">
+        <canvas id="chart-local-donut"></canvas>
+      </div>
+                
+      <div class="chart-box" style="flex: 2 1 400px; height: 300px;">
+        <canvas id="chart-local-toptasks"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="../../../assets/js/chart.js" defer></script>
+<script src="../../../assets/js/dashboard-local.js" defer></script>
+#+END_EXPORT
+
+* SOC and Security Engineering
+
+** DONE Rollout Wazuh Manager & Indexer cluster                      :WAZUH:
+CLOSED: [2026-02-26 Thu 17:30]
+:LOGBOOK:
+CLOCK: [2026-02-26 Thu 08:30]--[2026-02-26 Thu 12:00] =>  3:30
+CLOCK: [2026-02-26 Thu 13:30]--[2026-02-26 Thu 17:30] =>  4:00
+:END:
+Deployed the Wazuh centralized logging infrastructure. Validated index rotation.
+
+** DONE Create Ansible Playbooks for Baseline Security               :ANSIBLE:
+CLOSED: [2026-02-27 Fri 17:00]
+:LOGBOOK:
+CLOCK: [2026-02-27 Fri 08:30]--[2026-02-27 Fri 11:30] =>  3:00
+CLOCK: [2026-02-27 Fri 13:30]--[2026-02-27 Fri 17:00] =>  3:30
+:END:
+Developed roles to enforce SSH hardening, Fail2ban configuration, and automatic patching across the Debian fleet.
+
+** IN_PROGRESS Audit Linux Server Permissions                        :SECURITY:
+:LOGBOOK:
+CLOCK: [2026-03-02 Mon 10:30]--[2026-03-02 Mon 12:00] =>  1:30
+CLOCK: [2026-03-03 Tue 16:00]--[2026-03-03 Tue 18:00] =>  2:00
+CLOCK: [2026-03-04 Wed 15:00]--[2026-03-04 Wed 18:00] =>  3:00
+:END:
+Mapping SUID binaries and evaluating user groups. Remediating overly permissive folders.

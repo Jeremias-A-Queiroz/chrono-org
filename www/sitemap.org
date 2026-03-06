@@ -1,0 +1,8 @@
+#+TITLE: Sitemap for project chrono-test-org-pages
+
+- [[file:client1/client1.org][Consulting - Client 1]]
+- [[file:client2/client2.org][Consulting - Client 2]]
+- [[file:index.org][Master Index - Chrono Org]]
+- [[file:personal/client3/client3.org][Support - Client 3]]
+- [[file:personal/client4/client4.org][Support - Client 4]]
+- [[file:personal/personal.org][Personal Agenda - Jeremias]]

@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Client Portal - Client 1"
+AuthUserFile /etc/httpd/.passwd-agenda-client1
+Require valid-user

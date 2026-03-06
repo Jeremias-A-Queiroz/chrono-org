@@ -1,0 +1,11 @@
+#+TITLE: Index of Agenda
+#+AUTHOR: Jeremias
+#+DATE: {{{time(%Y-%m-%d)}}}
+#+options: toc:nil num:nil
+
+* Current
+- [[file:personal/personal.org][Personal Agenda]]
+- [[file:personal/client3/client3.org][Client 3 (Internal)]]
+- [[file:personal/client4/client4.org][Client 4 (Internal)]]
+- [[file:client1/client1.org][Client 1 (Consulting)]]
+- [[file:client2/client2.org][Client 2 (Consulting)]]

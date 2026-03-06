@@ -8,9 +8,11 @@
 (require 'org)
 (require 'subr-x)
 
-;; Variável de configuração (Deve ser populada pelo publish.el ou init.el)
+;; Configuration variables (Must be populated by publish.el or init.el)
 (defvar clock2json/agenda-files nil
   "List of absolute paths to agenda .org files.")
+(defvar clock2json/agenda-main-context "personal"
+  "Define the root/main context for the agenda JSON extraction engine.")
 
 ;;; ----------------------------------------------------------------------------
 ;;; UTILITIES (Suckless + GOFAI)
@@ -181,7 +183,7 @@
               ;; Specifies where to save the Global Dashboard.
 	      ;; This must match the name of the .org file corresponding to the HTML page
 	      ;; you intend to use as the global dashboard.
-              (when (string= context "pessoal")
+              (when (string= context clock2json/agenda-main-context)
                 (setq index-assets-dir assets-dir))
               
               (message "[OK] %s: %d processed entryes." context (length entries))))
