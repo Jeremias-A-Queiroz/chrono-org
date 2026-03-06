@@ -4,13 +4,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const month = container.dataset.month;
 
-    // Helper: Converte Date string para minutos totais desde a meia-noite
+    // Helper: Converts a date string to total minutes from midnight.
     const getMinutes = (dateStr) => {
         const d = new Date(dateStr);
         return d.getHours() * 60 + d.getMinutes();
     };
 
-    // Helper: Formata minutos para HH:mm
+    //  Helper: Formats minutes to HH:mm.
     const formatHM = (mins) => {
         const h = Math.floor(mins / 60).toString().padStart(2, '0');
         const m = (mins % 60).toString().padStart(2, '0');
@@ -22,11 +22,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!response.ok) throw new Error("JSON Global não encontrado.");
         const data = await response.json();
 
-        // Configuração Dark Mode (Gruvbox Material)
+        // Dark Mode Configuration (Gruvbox Material)
         Chart.defaults.color = '#a89984';
         Chart.defaults.borderColor = '#3c3836';
 
-        // 1. Mapeamento de Contextos (Cores e Totais)
+        // 1. Context Mapping (Colors and Totals)
+
         const contextMap = {};
         data.summaries.forEach(s => {
             contextMap[s.context] = { 
@@ -36,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
         });
 
-        // 2. Processamento para Timeline (Gráfico B)
+        // 2. "Timeline Processing (Chart B)"
         const timelineDatasets = {}; // { context: [ {x, y: [start, end]} ] }
         let globalMinStart = 1440;
         let globalMaxEnd = 0;
@@ -46,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!entry.start || !entry.end) return;
 
             const ctx = entry.context || "outros";
-            // Garante que o contexto exista no mapa (fallback para robustez)
+            // Ensures the context exists in the map (fallback for robustness)
             if (!contextMap[ctx]) contextMap[ctx] = { color: '#504945', label: ctx, total: 0 };
 
             const dateStr = entry.start.split('T')[0];
@@ -55,26 +56,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             presentDates.add(dateStr);
 
-            // Atualiza limites globais do eixo Y
+            // Global limits for Y axis
             if (startMin < globalMinStart) globalMinStart = startMin;
             if (endMin > globalMaxEnd) globalMaxEnd = endMin;
 
             if (!timelineDatasets[ctx]) timelineDatasets[ctx] = [];
             
-            // Floating Bar: Objeto x/y independente
+            // Floating Bar: x/y object independ
             timelineDatasets[ctx].push({
                 x: dateStr,
                 y: [startMin, endMin]
             });
         });
 
-        // Arredonda limites para horas cheias (margem visual)
+        // Rounds limits to whole hours (for visual display)
         globalMinStart = Math.floor(globalMinStart / 60) * 60;
         globalMaxEnd = Math.ceil(globalMaxEnd / 60) * 60;
         
         const sortedDates = Array.from(presentDates).sort();
 
-        // Montagem dos Datasets para o Gráfico B
+        // Datasets mounts for B chart
         const datasetsB = Object.keys(timelineDatasets).map(ctx => ({
             label: contextMap[ctx].label,
             data: timelineDatasets[ctx],
@@ -85,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }));
 
         // ==========================================
-        // GRÁFICO B: Timeline Global (Floating Bars)
+        // Chart B: Timeline Global (Floating Bars)
         // ==========================================
         new Chart(document.getElementById('chart-master-chronological'), {
             type: 'bar',
@@ -98,16 +99,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 maintainAspectRatio: false,
                 scales: {
                     x: { 
-                        stacked: true, // Contextos se empilham na mesma coluna do dia
+                        stacked: true, 
                         title: { display: true, text: 'Dia do Mês' },
                         grid: { color: '#32302f' }
                     },
                     y: { 
                         min: globalMinStart,
                         max: globalMaxEnd,
-                        stacked: false, // Importante: Valores são absolutos [start, end], não somam
+                        stacked: false, // Important: Values are absolute [start, end], not cumulative
                         ticks: {
-                            stepSize: 120, // 2 horas
+                            stepSize: 120, // 2 hours
                             callback: v => formatHM(v)
                         },
                         title: { display: true, text: 'Horário' },
@@ -132,16 +133,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         // ==========================================
-        // GRÁFICOS DE VOLUME (Reaproveitados/Ajustados)
+        // VOLUME CHARTS (Reused/Adjusted)
         // ==========================================
-	// CRIAÇÃO DE UM NOVO ARRAY FILTRADO - ESTA É A ÚNICA LINHA REALMENTE NOVA
+	// CREATION OF A NEW FILTERED ARRAY - THIS IS THE ONLY TRULY NEW LINE
         const filteredContexts = Object.values(contextMap).filter(c => c.total > 0); 
         const labelsVol = filteredContexts.map(c => c.label);
-        // Converter para horas para facilitar leitura
+        // Convert to hour
         const dataVol = filteredContexts.map(c => (c.total / 60).toFixed(1));
         const colorsVol = filteredContexts.map(c => c.color);
 
-        // Gráfico C: Donut (Volume por Cliente)
+        // Chart C: Donut (Client volum)
         new Chart(document.getElementById('chart-master-donut'), {
             type: 'doughnut',
             data: {
@@ -160,7 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
 
-        // Gráfico A: Barras Horizontais (Ranking)
+        // Chart A: Horizontal Bars (Ranking)
         new Chart(document.getElementById('chart-master-horizontal'), {
             type: 'bar',
             data: {

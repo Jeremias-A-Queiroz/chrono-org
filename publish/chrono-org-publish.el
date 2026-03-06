@@ -1,12 +1,13 @@
-;;; chrono-org-publish.el --- Configurações de Publicação para o Projeto Chrono-Org
+;;; chrono-org-publish.el --- Publishing Configurations for the Chrono-Org Project
 
-;; Requer o pacote de publicação do Org-mode
+;; Requires the Org-mode publishing package
 (require 'ox-publish)
 
 (setq org-html-head-include-default-style nil)
-(setq org-html-body-container-element nil) ; Opcional, mas recomendado para controle total do layout
+(setq org-html-body-container-element nil) ; Optional, but recommended for full layout control
 
-;; Inclusão de CSS e Lógica de Tema
+
+;; CSS Inclusion and Theme Logic
 (setq org-html-head
       (concat
        "<script>
@@ -18,12 +19,12 @@
            }
          })();
        </script>\n"
-       ;; Caminhos corrigidos para serem absolutos à raiz do *subsite* "/agenda/"
+       ;; Paths corrected to be absolute to the root of the "/agenda/" subsite
        "<link rel=\"stylesheet\" type=\"text/css\" href=\"/agenda/assets/css/style.css\" />\n"
        "<script src=\"/agenda/assets/js/theme-switcher.js\" type=\"text/javascript\" defer=\"defer\"></script>"))
 
 
-;; Configuração para o link de validação XHTML (mantido como no exemplo)
+;; Configuration for the XHTML validation link (kept as in the example)
 (setq org-html-validation-link "<a href=\"https://validator.w3.org/check?uri=https%3A%2F%2Fwww.infralinux.com.br%2F\"><img
       src=\"https://www.w3.org/Icons/valid-xhtml10\" alt=\"Valid XHTML 1.0 Strict\" height=\"31\" width=\"88\" /></a>")
 
@@ -42,68 +43,68 @@
       (setq published-file new-filepath))
     published-file))
 
-;; Definição da lista de projetos de publicação
+;; Definition of the list of publication projects
 (setq org-publish-project-alist
       '(
-	;; 1. Publica todos os arquivos .org do projeto Agenda para HTML
+	;; 1. Export all .org files from the Agenda project to HTML
 	("chrono-org-pages"
-	 :base-directory "~/Trabalho/Agenda/"           ; Diretório raiz dos seus arquivos .org
+	 :base-directory "~/Trabalho/Agenda/"           ; .org root dir
 	 :base-extension "org"
-	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/" ; Diretório de destino no VPS
-	 :recursive t                                   ; Publica subdiretórios recursivamente
+	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/" ; VPS final path 
+	 :recursive t                                   ;  Recursive publish dirs
 	 :publishing-function chrono-org-publish-versioned-html  ; Custom wrapper function
-	 :auto-sitemap t                                ; Gera sitemap automaticamente
-	 :sitemap-style list                            ; Estilo de lista para o sitemap
-	 :sitemap-filename "sitemap.org"                ; Nome do arquivo sitemap
-	 :author "Jeremias Alves Queiroz"               ; Seu nome
-	 :email "jeremias@redes.eti.br"                 ; Seu email
-	 :with-creator t                                ; Inclui o gerador (Org-mode) no HTML
-	 :with-timestamps t                             ; Inclui timestamps (data de criação/modificação)
-         :with-deadline t                               ; Inclui DEADLINE property
-         :with-scheduled t                              ; Inclui SCHEDULED property
+	 :auto-sitemap t                                ; auto-sitemap t or nil
+	 :sitemap-style list                            ; sitemap style
+	 :sitemap-filename "sitemap.org"                
+	 :author "Jeremias Alves Queiroz"               
+	 :email "jeremias@redes.eti.br"                 
+	 :with-creator t                                ; Include Org-mode generation info in HTML
+	 :with-timestamps t                             ; Include timestamps 
+         :with-deadline t                               ; Include DEADLINE property
+         :with-scheduled t                              ; Include SCHEDULED property
 	 )
 
-	;; 2. Publica os arquivos CSS globais
+	;; 2. Publish global css style
 	("chrono-org-css"
-	 :base-directory "~/src/chrono-org/assets/css/" ; Diretório local do CSS
+	 :base-directory "~/src/chrono-org/assets/css/" ; Local style dir
 	 :base-extension "css"
-	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/assets/css" ; Destino: raiz/assets/css/
-	 :publishing-function org-publish-attachment    ; Copia o arquivo como está
-	 :recursive t                                   ; Em caso de múltiplos arquivos/subdiretórios CSS
+	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/assets/css" ; css style final path
+	 :publishing-function org-publish-attachment    ; Copy as is
+	 :recursive t                                   ; recursive copy
 	 )
 
-	;; 3. Publica os arquivos JavaScript globais
+	;; 3. Publish global javascript
 	("chrono-org-js"
-	 :base-directory "~/src/chrono-org/assets/js/"  ; Diretório local do JS
+	 :base-directory "~/src/chrono-org/assets/js/"  ; Local JS dir
 	 :base-extension "js"
-	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/assets/js" ; Destino: raiz/assets/js/
-	 :publishing-function org-publish-attachment    ; Copia o arquivo como está
-	 :recursive t                                   ; Em caso de múltiplos arquivos/subdiretórios JS
+	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/assets/js" ; JS final path
+	 :publishing-function org-publish-attachment    ; Copy as is
+	 :recursive t                                   ; Recursive copy
 	 )
 
-	;; 4. Publica os arquivos JSON de dados, mantendo a hierarquia
+	;; 4. Publishes data JSON files, maintaining the hierarchy
 	("chrono-org-data-json"
-	 :base-directory "~/Trabalho/Agenda/"           ; Mesma base das páginas Org, para espelhar a estrutura
+	 :base-directory "~/Trabalho/Agenda/"           ; Same base as Org pages, to mirror the structure
 	 :base-extension "json"
-	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/" ; Mesma raiz das páginas Org
-	 :publishing-function org-publish-attachment    ; Copia o arquivo como está
-	 :recursive t                                   ; ESSENCIAL para copiar todos os JSONs em subdiretórios
+	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/" ; Same root of Org pages
+	 :publishing-function org-publish-attachment    ; copy as is
+	 :recursive t                                   ; recursive copy
 	 )
 
-	;; 5. Publica arquivos de imagem (exemplo, ajuste o caminho base conforme necessário)
+	;; 5. Publish image files (e.g., adjust base path as needed)
 	("chrono-org-images"
-	 :base-directory "~/src/chrono-org/assets/img/" ; Diretório local das imagens
+	 :base-directory "~/src/chrono-org/assets/img/" ; Images local path
 	 :base-extension "jpg\\|gif\\|png\\|svg"
-	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/assets/img" ; Destino: raiz/assets/img/
+	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/assets/img" ; Images final path
 	 :publishing-function org-publish-attachment
 	 :recursive t
 	 )
 
-	;; 6. Componente para publicar todos os outros componentes
+	;; 6. Component for publishing all other components
 	("chrono-org-all" :components ("chrono-org-pages" "chrono-org-css" "chrono-org-js" "chrono-org-data-json" "chrono-org-images"))
 	))
 
-;; Fornece uma mensagem para que o Emacs saiba que o arquivo foi carregado
+;; Provides a message to indicate the file has been loaded
 (provide 'chrono-org-publish)
 
 ;;; chrono-org-publish.el ends here
