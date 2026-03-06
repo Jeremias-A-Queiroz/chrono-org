@@ -10,7 +10,9 @@ O objetivo é criar um fluxo de publicação "suckless" para o gerenciamento de 
 ---
 
 ## 2. Tarefas Pendentes
-- [ ] Criar uma estratégia consistente de arquivos `.htaccess`
+- [ ] Criar arquivos de exemplo;
+- [ ] Criar uma estratégia consistente de arquivos `.htaccess`;
+- [ ] Criar README.md do projeto.
 ---
 
 ## 3. Notas Técnicas Importantes
@@ -20,4 +22,4 @@ O objetivo é criar um fluxo de publicação "suckless" para o gerenciamento de 
 3.  **Deploy**: O caminho de deploy final é `/scp:infrasrv:/var/www/html/www/public-html/agenda/`.
 
 ---
-*Gerado em 05/03/2026*
+*Gerado em 06/03/2026*
