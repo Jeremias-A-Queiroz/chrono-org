@@ -45,7 +45,7 @@
 
 ;; Definition of the list of publication projects
 (setq org-publish-project-alist
-      '(
+      `(
 	;; 1. Export all .org files from the Agenda project to HTML
 	("chrono-org-pages"
 	 :base-directory "~/Trabalho/Agenda/"           ; .org root dir
@@ -82,14 +82,14 @@
 	 :recursive t                                   ; Recursive copy
 	 )
 
-	;; 4. Publishes data JSON files, maintaining the hierarchy
+	;; 4. Publishes data JSON files and .htaccess, maintaining the hierarchy
 	("chrono-org-data-json"
-	 :base-directory "~/Trabalho/Agenda/"           ; Same base as Org pages, to mirror the structure
-	 :base-extension "json"
-	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/" ; Same root of Org pages
-	 :publishing-function org-publish-attachment    ; copy as is
-	 :recursive t                                   ; recursive copy
-	 )
+	  :base-directory "~/Trabalho/Agenda/"           ; Same base as Org pages, to mirror the structure
+	  :base-extension "json"
+	  :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/" ; Same root of Org pages
+	  :publishing-function org-publish-attachment    ; copy as is
+	  :recursive t                                   ; recursive copy
+	  :include ,cop/agenda-security-files)
 
 	;; 5. Publish image files (e.g., adjust base path as needed)
 	("chrono-org-images"
