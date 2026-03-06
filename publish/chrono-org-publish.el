@@ -6,6 +6,7 @@
 (setq org-html-head-include-default-style nil)
 (setq org-html-body-container-element nil) ; Optional, but recommended for full layout control
 
+(defvar cop/agenda-security-files nil)
 
 ;; CSS Inclusion and Theme Logic
 (setq org-html-head
