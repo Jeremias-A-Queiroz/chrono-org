@@ -1,0 +1,7 @@
+# Protect Index and Sitemap
+<FilesMatch "^(index|sitemap)\.html$">
+    AuthType Basic
+    AuthName "Administrative Access - Agenda"
+    AuthUserFile /etc/httpd/.passwd-agenda-personal
+    Require valid-user
+</FilesMatch>

@@ -1,0 +1,1 @@
+[{"task":"Final validation & Go-live","id":"","start":"2026-03-05T08:00:00","end":"2026-03-05T12:00:00","duration_minutes":240,"tags":["CONSULTING"],"todo_state":"IN_PROGRESS","effort":""},{"task":"Setup Proxmox Backup Server","id":"","start":"2026-03-03T10:00:00","end":"2026-03-03T12:00:00","duration_minutes":120,"tags":["BACKUP"],"todo_state":"DONE","effort":""}]
