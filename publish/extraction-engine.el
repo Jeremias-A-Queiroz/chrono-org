@@ -1,6 +1,6 @@
 ;;; extraction-engine.el --- Motor de extração de métricas da Agenda Org-mode
 ;;;
-;;; Autor: Jeremias (Gerado via Gemini)
+;;; Autor: Jeremias
 ;;; Descrição: Extrai dados granulares de LOGBOOK dos arquivos de agenda e gera JSONs.
 ;;; Dependências: json, org, subr-x (Nativas do Emacs)
 
@@ -67,14 +67,16 @@
               (tags (org-get-tags))
               (todo (org-get-todo-state))
               (effort (org-entry-get (point) "EFFORT"))
-              (mov-id (org-entry-get (point) "MOV_ID"))
+              (mov-id (org-entry-get (point) "TICKET_ID"))
               ;; Contexto local da iteração
               (entry-data nil))
          
          ;; Busca proativa por CLOCKs dentro do LOGBOOK desta entrada
          (save-excursion
            ;; 1. Tenta achar o drawer LOGBOOK
-           (when (re-search-forward ":LOGBOOK:" (save-excursion (org-end-of-subtree t)) t)
+           ;; FIX: Usa org-entry-end-position para limitar a busca apenas ao nó atual,
+           ;; ignorando filhos/subtarefas para evitar duplicação de tempo.
+           (when (re-search-forward ":LOGBOOK:" (save-excursion (org-entry-end-position)) t)
              (let ((drawer-end (save-excursion (re-search-forward ":END:" nil t))))
                ;; 2. Itera sobre linhas de CLOCK dentro do drawer
                (while (re-search-forward "^[ \t]*CLOCK: \\(\\[.*?\\]\\)--\\(\\[.*?\\]\\)" drawer-end t)
@@ -158,16 +160,25 @@
               
               ;; Gera JSONs Locais
               (clock2json/write-json-file entries 
-                                        (expand-file-name (format "%s-%s.json" context target-month) assets-dir))
+                                          (expand-file-name (format "%s-%s.json" context target-month) assets-dir))
               (clock2json/write-json-file summary 
-                                        (expand-file-name (format "%s-%s-summary.json" context target-month) assets-dir))
+                                          (expand-file-name (format "%s-%s-summary.json" context target-month) assets-dir))
               
               ;; Acumula para Global
               (push summary global-summaries)
-              (setq global-entries (append global-entries entries))
+              
+              ;; FIX: Enriquecimento para Global (Adiciona Contexto, Remove ID)
+              (let ((context-entries 
+                     (mapcar (lambda (entry)
+                               (let ((new-entry (copy-alist entry)))
+                                 (setq new-entry (assoc-delete-all "id" new-entry))
+                                 (push (cons "context" context) new-entry)
+                                 new-entry))
+                             entries)))
+                (setq global-entries (append global-entries context-entries)))
               
               ;; Identifica onde salvar o Global Dashboard (no contexto do Index)
-              (when (string= context "index")
+              (when (string= context "pessoal")
                 (setq index-assets-dir assets-dir))
               
               (message "[OK] %s: %d entradas extraídas." context (length entries))))
@@ -180,9 +191,9 @@
                                  (cons "summaries" global-summaries)
                                  (cons "all_entries" global-entries))))
           (clock2json/write-json-file global-data 
-                                    (expand-file-name (format "global-dashboard-%s.json" target-month) index-assets-dir))
+                                      (expand-file-name (format "global-dashboard-%s.json" target-month) index-assets-dir))
           (message ">>> Dashboard Global gerado com sucesso em: %s" index-assets-dir))
-      (message "[ALERTA] Arquivo 'index.org' não encontrado. Dashboard Global não gerado."))))
+      (message "[ALERTA] Arquivo 'pessoal.org' não encontrado. Dashboard Global não gerado."))))
 
 ;;; Exemplo de uso no Scratch:
 ;; (load "~/src/teste-agenda/agenda/publish/extraction-engine.el")
