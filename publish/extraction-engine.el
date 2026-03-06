@@ -1,8 +1,8 @@
-;;; extraction-engine.el --- Motor de extração de métricas da Agenda Org-mode
+;;; extraction-engine.el --- Org-mode Agenda Metrics Extraction Engine
 ;;;
-;;; Autor: Jeremias
-;;; Descrição: Extrai dados granulares de LOGBOOK dos arquivos de agenda e gera JSONs.
-;;; Dependências: json, org, subr-x (Nativas do Emacs)
+;;; Author: Jeremias
+;;; Description: Extracts granular LOGBOOK data from agenda files and generates JSONs.
+;;; Dependencies: json, org, subr-x (Emacs built-in)
 
 (require 'json)
 (require 'org)
@@ -10,56 +10,57 @@
 
 ;; Variável de configuração (Deve ser populada pelo publish.el ou init.el)
 (defvar clock2json/agenda-files nil
-  "Lista de caminhos completos dos arquivos .org da agenda.")
+  "List of absolute paths to agenda .org files.")
 
 ;;; ----------------------------------------------------------------------------
-;;; UTILITÁRIOS (Suckless + GOFAI)
+;;; UTILITIES (Suckless + GOFAI)
 ;;; ----------------------------------------------------------------------------
+
 
 (defun clock2json/generate-color-from-string (str)
-  "Gera uma cor HEX consistente baseada no hash MD5 da string.
-  Usa secure-hash nativo para evitar erros de dependência."
+  "Generate a consistent HEX color based on the MD5 hash of the string.
+  Uses native `secure-hash' to avoid dependency issues."
   (let* ((hash (secure-hash 'md5 (or str "default")))
-         ;; Pega os primeiros 6 caracteres do hash para compor RRGGBB
+         ;; Extracts the first 6 characters of the hash to form RRGGBB
          (r (substring hash 0 2))
          (g (substring hash 2 4))
          (b (substring hash 4 6)))
     (format "#%s%s%s" r g b)))
 
 (defun clock2json/get-context-from-file (filepath)
-  "Retorna o nome base do arquivo como contexto (ex: .../unimed.org -> unimed)."
+  "Returns the file's base name as context (e.g., .../client1.org -> client1)."
   (file-name-base filepath))
 
 (defun clock2json/ensure-assets-dir (filepath)
-  "Garante que existe ./assets/data/ relativo ao arquivo e retorna o caminho."
+  "Ensures that `./assets/data/` exists relative to the file and returns the path."
   (let ((dir (concat (file-name-directory filepath) "assets/data/")))
     (unless (file-exists-p dir)
       (make-directory dir t))
     dir))
 
 (defun clock2json/parse-org-timestamp (ts-str)
-  "Converte timestamp Org [YYYY-MM-DD Dia HH:MM] para string ISO 8601 (YYYY-MM-DDTHH:MM:00)."
+  "Converts Org timestamp [YYYY-MM-DD Day HH:MM] to ISO 8601 string (YYYY-MM-DDTHH:MM:00)."
   (when (string-match "\\[\\([0-9-]+\\).*?\\([0-9:]+\\)\\]" ts-str)
     (format "%sT%s:00" (match-string 1 ts-str) (match-string 2 ts-str))))
 
 (defun clock2json/get-duration-minutes (start-iso end-iso)
-  "Calcula a diferença em minutos entre dois timestamps ISO."
+  "Calculate the difference in minutes between two ISO timestamps."
   (let ((t1 (date-to-time start-iso))
         (t2 (date-to-time end-iso)))
     (round (/ (float-time (time-subtract t2 t1)) 60))))
 
 (defun clock2json/write-json-file (data filepath)
-  "Escreve a estrutura alist DATA como JSON no FILEPATH."
+  "Write the alist DATA as JSON to FILEPATH."
   (with-temp-file filepath
     (insert (json-encode data))))
 
 ;;; ----------------------------------------------------------------------------
-;;; EXTRAÇÃO (CORE)
+;;; Extraction (CORE)
 ;;; ----------------------------------------------------------------------------
 
 (defun clock2json/extract-entries-from-buffer (target-month)
-  "Varre o buffer atual buscando entradas de LOGBOOK dentro do TARGET-MONTH (YYYY-MM).
-  Retorna uma lista de objetos (alists) prontos para JSON."
+  "Scans the current buffer for LOGBOOK entries within TARGET-MONTH (YYYY-MM).
+  Returns a list of objects (alists) ready for JSON."
   (let ((entries '()))
     (org-map-entries
      (lambda ()
@@ -68,24 +69,24 @@
               (todo (org-get-todo-state))
               (effort (org-entry-get (point) "EFFORT"))
               (mov-id (org-entry-get (point) "TICKET_ID"))
-              ;; Contexto local da iteração
+              ;; Local iteration context
               (entry-data nil))
          
-         ;; Busca proativa por CLOCKs dentro do LOGBOOK desta entrada
+         ;; Proactive search for CLOCKs within this entry's LOGBOOK
          (save-excursion
-           ;; 1. Tenta achar o drawer LOGBOOK
-           ;; FIX: Usa org-entry-end-position para limitar a busca apenas ao nó atual,
-           ;; ignorando filhos/subtarefas para evitar duplicação de tempo.
+           ;; 1. Try to find the LOGBOOK drawer
+           ;; FIX: Use org-entry-end-position to limit the search to the current node only,
+           ;; ignoring children/subtasks to avoid time duplication.
            (when (re-search-forward ":LOGBOOK:" (save-excursion (org-entry-end-position)) t)
              (let ((drawer-end (save-excursion (re-search-forward ":END:" nil t))))
-               ;; 2. Itera sobre linhas de CLOCK dentro do drawer
+               ;; 2. Iterate over CLOCK lines within the drawer
                (while (re-search-forward "^[ \t]*CLOCK: \\(\\[.*?\\]\\)--\\(\\[.*?\\]\\)" drawer-end t)
                  (let* ((raw-start (match-string 1))
                         (raw-end (match-string 2))
                         (iso-start (clock2json/parse-org-timestamp raw-start))
                         (iso-end (clock2json/parse-org-timestamp raw-end)))
                    
-                   ;; 3. Filtro de Mês Corrente
+                   ;; 3. Current Month Filter
                    (when (and iso-start 
                               (string-prefix-p target-month iso-start))
                      
@@ -101,7 +102,7 @@
     entries))
 
 (defun clock2json/calculate-summary (entries context target-month)
-  "Agrega os dados brutos para gerar o arquivo de sumário."
+  "Aggregate the raw data to generate the summary file."
   (let ((total 0)
         (by-tag (make-hash-table :test 'equal))
         (by-status (make-hash-table :test 'equal)))
@@ -111,18 +112,18 @@
             (tags (cdr (assoc "tags" e)))
             (status (cdr (assoc "todo_state" e))))
         
-        ;; Acumula total geral
+        ;; Accumulates grand total
         (setq total (+ total dur))
         
-        ;; Acumula por status
+        ;; Accumulates status
         (when status
           (puthash status (+ dur (gethash status by-status 0)) by-status))
         
-        ;; Acumula por tag
+        ;; Accumulates tag
         (dolist (tag tags)
           (puthash tag (+ dur (gethash tag by-tag 0)) by-tag))))
     
-    ;; Constrói objeto de retorno
+    ;; Build return objects
     (list (cons "context" context)
           (cons "period" target-month)
           (cons "total_minutes" total)
@@ -131,43 +132,43 @@
           (cons "by_status" by-status))))
 
 ;;; ----------------------------------------------------------------------------
-;;; FUNÇÃO PRINCIPAL (ORQUESTRADOR)
+;;; Core function (orchestrator)
 ;;; ----------------------------------------------------------------------------
 
 (defun clock2json/agenda-extract-metrics (&optional target-month)
-  "Extrai métricas de todos os arquivos em clock2json/agenda-files.
-  Se TARGET-MONTH (YYYY-MM) não for fornecido, usa o mês atual do sistema."
+  "Extracts metrics from all files in clock2json/agenda-files.
+  If TARGET-MONTH (YYYY-MM) is not provided, the system's current month is used."
   (interactive)
-  ;; Default para mês corrente se nil
+  ;; Default corrent month if nil 
   (unless target-month
     (setq target-month (format-time-string "%Y-%m")))
   
-  (message ">>> Iniciando extração Agenda para: %s" target-month)
+  (message ">>> Starting extraction Schedule to: %s" target-month)
   
   (let ((global-summaries '())
         (global-entries '())
         (index-assets-dir nil))
     
-    ;; 1. Processamento Local (Contexto por Contexto)
+    ;; 1. Local process
     (dolist (file clock2json/agenda-files)
       (if (file-exists-p file)
           (with-current-buffer (find-file-noselect file)
             (let* ((context (clock2json/get-context-from-file file))
                    (assets-dir (clock2json/ensure-assets-dir file))
-                   ;; Extração
+                   ;; Extraction
                    (entries (clock2json/extract-entries-from-buffer target-month))
                    (summary (clock2json/calculate-summary entries context target-month)))
               
-              ;; Gera JSONs Locais
+              ;; Build local jsons
               (clock2json/write-json-file entries 
                                           (expand-file-name (format "%s-%s.json" context target-month) assets-dir))
               (clock2json/write-json-file summary 
                                           (expand-file-name (format "%s-%s-summary.json" context target-month) assets-dir))
               
-              ;; Acumula para Global
+              ;; Accumulates for global
               (push summary global-summaries)
               
-              ;; FIX: Enriquecimento para Global (Adiciona Contexto, Remove ID)
+              ;; FIX: "Global Enrichment (Contextualization, ID Stripping)"
               (let ((context-entries 
                      (mapcar (lambda (entry)
                                (let ((new-entry (copy-alist entry)))
@@ -177,14 +178,16 @@
                              entries)))
                 (setq global-entries (append global-entries context-entries)))
               
-              ;; Identifica onde salvar o Global Dashboard (no contexto do Index)
+              ;; Specifies where to save the Global Dashboard.
+	      ;; This must match the name of the .org file corresponding to the HTML page
+	      ;; you intend to use as the global dashboard.
               (when (string= context "pessoal")
                 (setq index-assets-dir assets-dir))
               
-              (message "[OK] %s: %d entradas extraídas." context (length entries))))
-        (message "[AVISO] Arquivo ignorado (não encontrado): %s" file)))
+              (message "[OK] %s: %d processed entryes." context (length entries))))
+        (message "[Warning] ignored file (not found): %s" file)))
     
-    ;; 2. Processamento Global (Apenas se Index existir)
+    ;; 2. Global Processing (Only if Index exists)
     (if index-assets-dir
         (let ((global-data (list (cons "period" target-month)
                                  (cons "generated_at" (format-time-string "%Y-%m-%dT%H:%M:%S"))
@@ -192,10 +195,10 @@
                                  (cons "all_entries" global-entries))))
           (clock2json/write-json-file global-data 
                                       (expand-file-name (format "global-dashboard-%s.json" target-month) index-assets-dir))
-          (message ">>> Dashboard Global gerado com sucesso em: %s" index-assets-dir))
-      (message "[ALERTA] Arquivo 'pessoal.org' não encontrado. Dashboard Global não gerado."))))
+          (message ">>> Global Dashboard generated successfully at: %s" index-assets-dir))
+      (message "[ALERT] File 'pessoal.org' not found. Global Dashboard not generated."))))
 
-;;; Exemplo de uso no Scratch:
+;;; Scratch use example:
 ;; (load "~/src/teste-agenda/agenda/publish/extraction-engine.el")
 ;; (setq clock2json/agenda-files '("~/src/teste-agenda/agenda/www/pessoal/index.org" ...))
 ;; (clock2json/agenda-extract-metrics "2026-02")

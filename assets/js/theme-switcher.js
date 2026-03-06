@@ -15,22 +15,23 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {string} theme - The theme to apply ('dark' or 'light').
    */
     const applyTheme = (theme) => {
-	// Alvo agora é documentElement (tag html), não body
+	// The target is now documentElement (HTML tag), not body
 	document.documentElement.classList.toggle('light-theme', theme === 'light');
     };
 
     const toggleTheme = () => {
-	// 1. Adiciona classe de transição para animar suavemente SÓ AGORA
+	// 1. Adds transition class to animate smoothly, currently.
 	document.documentElement.classList.add('transitioning');
 
-	// 2. Lógica de troca
+	// 2. Trade logic
 	const isLightTheme = document.documentElement.classList.contains('light-theme');
 	const newTheme = isLightTheme ? 'dark' : 'light';
   
 	applyTheme(newTheme);
 	localStorage.setItem(localStorageKey, newTheme);
 
-	// 3. Remove classe de transição após o efeito acabar (limpeza)
+	
+        // 3. Remove transition class after the effect ends (cleanup)
 	setTimeout(() => {
 	    document.documentElement.classList.remove('transitioning');
 	}, 300); 

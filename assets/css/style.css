@@ -10,20 +10,20 @@
 
 :root {
     /* --- DEFAULT: DARK MODE (Identity: "Phosphor") --- */
-    --bg-color: #1d2021;          /* Grafite Profundo */
-    --surface-bg: #282828;        /* Superfície elevada */
-    --surface-highlight: #3c3836; /* Hover / Seleção */
+    --bg-color: #1d2021;          /* Deep Graphite */
+    --surface-bg: #282828;        /* Raised Surface */
+    --surface-highlight: #3c3836; /* Hover / Selection */
 
     /* Typography */
     --text-main: #ebdbb2;         /* "Old Paper" */
-    --text-dim: #a89984;          /* Metadados */
-    --text-faint: #504945;        /* Detalhes sutis */
+    --text-dim: #a89984;          /* Metadata */
+    --text-faint: #504945;        /* Subtle details */
 
     /* Accents */
-    --accent-primary: #d79921;    /* Âmbar Industrial */
-    --accent-secondary: #458588;  /* Ciano Muted */
-    --accent-alert: #cc241d;      /* Vermelho Tijolo */
-    --accent-success: #98971a;    /* Verde Oliva */
+    --accent-primary: #d79921;    /* Industrial Amber */
+    --accent-secondary: #458588;  /* Muted Cyan */
+    --accent-alert: #cc241d;      /* Brick Red */
+    --accent-success: #98971a;    /* Olive Green */
 
     /* Structure */
     --border-dim: #3c3836;
@@ -31,7 +31,7 @@
     --selection-bg: #504945;
 
     /* Code Blocks */
-    --code-bg: #141617;           /* Mais escuro que o fundo */
+    --code-bg: #141617;           /* Darker than background */
     --code-border: #32302f;
 
     /* Syntax Highlighting (Dark) */
@@ -150,11 +150,11 @@ html.transitioning body {
 
 
 /* ==========================================================================
-   4. LAYOUT (ESTRATÉGIA: SATÉLITE ANCORADO)
+   4. LAYOUT (STRATEGY: ANCHORED SATELLITE)
    Updated Selectors to match Org-mode HTML (#preamble, nav, header tags)
    ========================================================================== */
 
-/* A "Âncora": Containers principais centralizados. */
+/* The "Anchor": Main centralized containers. */
 #preamble,
 #content,
 #postamble {
@@ -165,9 +165,9 @@ html.transitioning body {
     display: block;
 }
 
-/* 
-   O Header e Nav dentro do Preamble. 
-   O HTML é <div id="preamble"><header>...</header><nav>...</nav></div>
+/*
+   The Header and Nav inside the Preamble.
+   The HTML is <div id="preamble"><header>...</header><nav>...</nav></div>
 */
 #preamble header {
     display: flex;
@@ -197,7 +197,7 @@ hr {
     height: 1px;
 }
 
-/* Regras para telas médias (laptops, tablets) a partir de 601px */
+/* Rules for medium screens (laptops, tablets) from 601px */
 @media screen and (min-width: 601px) {
     body { font-size: 16px; }
 
@@ -213,7 +213,7 @@ hr {
     .creator { display: inline; float: right; }
 }
 
-/* Sobrescrita para telas grandes, a partir de 1367px */
+/* Override for large screens, from 1367px */
 @media screen and (min-width: 1367px) {
     body { font-size: 18px; }
 
@@ -224,7 +224,7 @@ hr {
     }
 }
 
-/* Estado 1: Sidebar fixa em telas de médio porte (laptops) */
+/* State 1: Fixed sidebar on medium-sized screens (laptops) */
 @media screen and (min-width: 1025px) and (max-width: 1366px) {
     body:has(#sidebar) #sidebar {
         position: fixed;
@@ -237,7 +237,7 @@ hr {
     }
 }
 
-/* Estado 2: Sidebar fixa em telas grandes */
+/* State 2: Fixed sidebar on large screens */
 @media screen and (min-width: 1367px) {
     body:has(#sidebar) #sidebar {
         position: fixed;
@@ -250,7 +250,7 @@ hr {
     }
 }
 
-/* Estilo da Sidebar */
+/* Sidebar style*/
 #sidebar {
     font-family: var(--font-sans);
 }
@@ -292,7 +292,7 @@ hr {
     color: var(--accent-primary);
 }
 
-/* Responsividade: Em telas menores, o "satélite" volta ao fluxo normal */
+/* Responsiveness: On smaller screens, the "satellite" returns to normal flow */
 @media screen and (max-width: 1024px) {
     #sidebar {
         position: static;
@@ -524,7 +524,7 @@ kbd {
 .creator { display: block; color: var(--text-dim); margin-top: 2em; text-align: center;}
 @media screen and (min-width:600px){ .creator{ display:inline; float:right; margin-top: 0; } }
 
-/* Layout para Dashboards */
+/* Dashboard layout */
 .row {
     display: flex;
     flex-wrap: wrap;

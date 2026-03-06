@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const context = container.dataset.context;
     const month = container.dataset.month;
 
-    // Gerador de Cor Consistente via Bitwise (Suckless Hash)
+// Consistent Color Generator via Bitwise (Suckless Hash)
     const stringToColor = (str) => {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
@@ -19,13 +19,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         return color;
     };
 
-    // Helper: Converte Date ou String ISO para minutos totais desde a meia-noite
+    // Helper: Converts Date or ISO string to total minutes since midnight
     const getMinutesFromMidnight = (dateInput) => {
         const d = new Date(dateInput);
         return d.getHours() * 60 + d.getMinutes();
     };
 
-    // Helper: Converte minutos totais para formato HH:mm
+    // Helper: Converts total minutes to HH:mm format
     const formatMinutesToHM = (totalMinutes) => {
         const h = Math.floor(totalMinutes / 60);
         const m = totalMinutes % 60;
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
         const response = await fetch(`assets/data/${context}-${month}.json`);
-        if (!response.ok) throw new Error("JSON não encontrado.");
+        if (!response.ok) throw new Error("JSON not found.");
         const entries = await response.json();
 
         const taskTotals = {};
@@ -44,29 +44,29 @@ document.addEventListener("DOMContentLoaded", async () => {
         let globalMinStart = 1440;
         let globalMaxEnd = 0;
 
-        // Processamento dos dados
+        // Data process 
         entries.forEach(entry => {
             const taskId = entry.id || entry.task;
             const color = stringToColor(taskId);
             const dateStr = entry.start.split('T')[0];
-            const dayLabel = dateStr.split('-')[2]; // Exibe o dia do mês
+            const dayLabel = dateStr.split('-')[2]; // Print day month
             daysPresent.add(dayLabel);
             
             const startMin = getMinutesFromMidnight(entry.start);
             const endMin = getMinutesFromMidnight(entry.end);
             const duration = entry.duration_minutes;
 
-            // Atualiza limites globais para o Eixo Y Dinâmico
+            // Updates global limits for the Dynamic Y-Axis
             if (startMin < globalMinStart) globalMinStart = startMin;
             if (endMin > globalMaxEnd) globalMaxEnd = endMin;
 
-            // Agrupamento para Donut e Top5
+            // Donut group and Top5
             if (!taskTotals[taskId]) {
                 taskTotals[taskId] = { label: entry.task, duration: 0, color: color };
             }
             taskTotals[taskId].duration += duration;
 
-            // Organização para Timeline (Floating Bars via Objetos)
+            // Timeline organization (Floating Bars by Objetos)
             if (!timelineData[taskId]) timelineData[taskId] = [];
             timelineData[taskId].push({
                 x: dayLabel,
@@ -74,16 +74,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         });
 
-        // Margem de segurança nos limites (Arredonda para a hora cheia)
+        // Security margin on limites (full hour)
         globalMinStart = Math.floor(globalMinStart / 60) * 60;
         globalMaxEnd = Math.ceil(globalMaxEnd / 60) * 60;
 
-        // Configuração de cores globais do Chart.js para Dark Mode
+        // Chart.js dark mode configuration for Dark Mode
         Chart.defaults.color = '#a89984';
         Chart.defaults.borderColor = '#3c3836';
 
         // ==========================================
-        // GRÁFICO A: Timeline Mensal (Floating Bars)
+        // CHART A: Monthly Timeline (Floating Bars)
         // ==========================================
         const sortedDayLabels = Array.from(daysPresent).sort((a, b) => parseInt(a) - parseInt(b));
         
@@ -110,17 +110,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 scales: {
                     x: { 
                         title: { display: true, text: 'Dia do Mês' },
-                        stacked: true // Garante que múltiplas tarefas no mesmo dia ocupem a mesma coluna
+                        stacked: true // Ensures that multiple tasks scheduled for the same day occupy the same column.
                     },
                     y: { 
                         min: globalMinStart,
                         max: globalMaxEnd,
                         ticks: {
-                            stepSize: 120, // Segmentos de 2 em 2 horas
+                            stepSize: 120, // 2 hours segments
                             callback: (value) => formatMinutesToHM(value)
                         },
                         title: { display: true, text: 'Timeline (Horas)' },
-                        stacked: false // Importante: As barras flutuam em valores absolutos, não somam
+                        stacked: false // // Note: Bars represent absolute values and are not cumulative.
                     }
                 },
                 plugins: { 
@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         // ==========================================
-        // GRÁFICO B: Donut (Total por Tarefa)
+        // // CHART B: Donut (Total per Task)
         // ==========================================
         const sortedTasks = Object.values(taskTotals).sort((a, b) => b.duration - a.duration);
 
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         // ==========================================
-        // GRÁFICO C: Top 5 Tasks (Horizontal Bar)
+        // CHART C: Top 5 Tasks (Horizontal Bar)
         // ==========================================
         const topTasks = sortedTasks.slice(0, 5);
 
@@ -190,6 +190,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
     } catch (error) {
-        console.error("Erro ao renderizar Dashboard Local:", error);
+        console.error("Error rendering Local Dashboard:", error);
     }
 });
