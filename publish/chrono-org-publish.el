@@ -27,6 +27,21 @@
 (setq org-html-validation-link "<a href=\"https://validator.w3.org/check?uri=https%3A%2F%2Fwww.infralinux.com.br%2F\"><img
       src=\"https://www.w3.org/Icons/valid-xhtml10\" alt=\"Valid XHTML 1.0 Strict\" height=\"31\" width=\"88\" /></a>")
 
+;; Wrapper to append -YYYY-MM suffix to generated HTML files
+(defun chrono-org-publish-versioned-html (plist filename pub-dir)
+  "Publish Org to HTML and append current -YYYY-MM to filename, except for index and sitemap."
+  (let* ((published-file (org-html-publish-to-html plist filename pub-dir))
+         (basename (file-name-base filename))
+         (month-suffix (format-time-string "-%Y-%m"))
+         (target-filename (concat basename month-suffix ".html"))
+         (new-filepath (expand-file-name target-filename pub-dir)))
+    (when (and published-file
+               (not (member basename '("index" "sitemap")))
+               (file-exists-p published-file))
+      (rename-file published-file new-filepath t)
+      (setq published-file new-filepath))
+    published-file))
+
 ;; Definição da lista de projetos de publicação
 (setq org-publish-project-alist
       '(
@@ -36,7 +51,7 @@
 	 :base-extension "org"
 	 :publishing-directory "/scp:infrasrv:/var/www/html/www/public-html/agenda/" ; Diretório de destino no VPS
 	 :recursive t                                   ; Publica subdiretórios recursivamente
-	 :publishing-function org-html-publish-to-html  ; Função para converter Org para HTML
+	 :publishing-function chrono-org-publish-versioned-html  ; Custom wrapper function
 	 :auto-sitemap t                                ; Gera sitemap automaticamente
 	 :sitemap-style list                            ; Estilo de lista para o sitemap
 	 :sitemap-filename "sitemap.org"                ; Nome do arquivo sitemap
