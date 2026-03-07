@@ -4,8 +4,8 @@ Welcome to **Chrono-Org**, an elegant, pure-text workflow that bridges the gap b
 
 Built with the **K.I.S.S.** (Keep It Simple, Stupid) and **Suckless** philosophies in mind, this project treats Org-mode as the absolute source of truth. It extracts your logged hours using Emacs Lisp, generates static JSON data, renders beautiful Chart.js dashboards in the browser, and publishes everything securely via `org-publish` and Apache `.htaccess` rules.
 
-## Screenchot
-![Screenchot main dash](images/main-dash.png)
+## Screenshot
+![Screenshot main dash](images/main-dash.png)
 
 ## 🏗️ Architecture: The 4 Pillars
 
